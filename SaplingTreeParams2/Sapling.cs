@@ -92,8 +92,6 @@ namespace SaplingTreeParams2
                 return;
             }
 
-            sapi.LoadModConfig<SaplingTreeParamConfig>("saplingtreeparam_config.json");
-
             __instance.Api.World.BlockAccessor.SetBlock(0, __instance.Pos);
             __instance.Api.World.BulkBlockAccessor.ReadFromStagedByDefault = true;
             //float size = 0.6f + (float)__instance.Api.World.Rand.Next(0, (int) rcc.size) * 0.5f;
