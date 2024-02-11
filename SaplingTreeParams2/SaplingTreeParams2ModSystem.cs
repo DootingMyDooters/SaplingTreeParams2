@@ -7,6 +7,7 @@ using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 using static System.Net.Mime.MediaTypeNames;
+using System.Collections.Generic;
 
 [assembly: ModInfo("SaplingTreeParams2",
                     Authors = new string[] { "Dooters" },
@@ -18,7 +19,7 @@ namespace SaplingTreeParams2
     {
         public ICoreAPI api;
         public Harmony harmony;
-        public static SaplingTreeParamConfig config;
+        public static SaplingTreeParamConfig config = SaplingTreeParamConfig.Instance;
 
         public string configFileName = "saplingtreeparam_config.json";
 
@@ -32,30 +33,37 @@ namespace SaplingTreeParams2
         {
             try
             {
-                config = api.LoadModConfig<SaplingTreeParamConfig>(configFileName);
+                config.saplingParameters = api.LoadModConfig<List<SaplingParameters>>(configFileName);
             }
             catch (System.Exception e)
             {
                 // if the file doesn't exist it'll return null
-                // but if it does and there's a typo in the json
-                api.Logger.Error(e);
+                // but if it does and there's a typo in the json or it's just wrong
+                // we'll lof the error and 
+                api.Logger.Error(e);              
             }
-            if (config == null)
+            if (config.saplingParameters == null)
             {
                 this.api.Logger.Warning("[" + Mod.Info.ModID + "]: config didn't load, generating default config.");
-                config = new SaplingTreeParamConfig();
-                api.StoreModConfig<SaplingTreeParamConfig>(config, configFileName);
+                this.api.Logger.Warning("[" + Mod.Info.ModID + "]: default config will only contain settings for pine.");
+                config.saplingParameters = new List<SaplingParameters>() { new SaplingParameters() };
+                api.StoreModConfig(config.saplingParameters, configFileName);
             }
-
-            api.Logger.Event(
+            foreach (SaplingParameters saplingParameters in config.saplingParameters)
+            {
+                api.Logger.Event(
                 "config loaded (\n" +
-                    "\tskipForestFloor: " + config.skipForestFloor + ",\n" +
-                    "\tsize: " + config.size + ",\n" +
-                    "\totherBlockChance: " + config.otherBlockChance + "\n" +
-                    "\tvinesGrowthChance: " + config.vinesGrowthChance + "\n" +
-                    "\tmossGrowthChance: " + config.mossGrowthChance + "\n" +
+                    "\ttreeType: " + saplingParameters.treeType + ",\n" +
+                    "\tskipForestFloor: " + saplingParameters.skipForestFloor + ",\n" +
+                    "\tsize: " + saplingParameters.size + ",\n" +
+                    "\totherBlockChance: " + saplingParameters.otherBlockChance + "\n" +
+                    "\tvinesGrowthChance: " + saplingParameters.vinesGrowthChance + "\n" +
+                    "\tmossGrowthChance: " + saplingParameters.mossGrowthChance + "\n" +
+                    "\tignoreColdTemp: " + saplingParameters.ignoreColdTemp + "\n" +
                 ")"
              );
+            }
+            
         }
 
         public override void Start(ICoreAPI api)

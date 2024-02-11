@@ -10,6 +10,7 @@ using Vintagestory.GameContent;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
+using Vintagestory.API.Config;
 
 namespace SaplingTreeParams2
 {
@@ -19,13 +20,20 @@ namespace SaplingTreeParams2
 
         static void Prefix(float dt, ref BlockEntitySapling __instance)
         {
-            ICoreServerAPI sapi = __instance.Api as ICoreServerAPI;
-            SaplingTreeParamConfig rcc = sapi.LoadModConfig<SaplingTreeParamConfig>("saplingtreeparam_config.json");
-            if (!__instance.plantedFromSeed || (!__instance.Block.Variant["wood"].Equals("pine") && !__instance.Block.Variant["wood"].Equals("acacia")))
+            String instTreeType = __instance.Block.Variant["wood"];
+            float temperature = __instance.Api.World.BlockAccessor.GetClimateAt(__instance.Pos, EnumGetClimateMode.NowValues).Temperature;
+            
+            // doesn't affect naturally(?) occurring saplings or ones that aren't in the config.
+            if (!__instance.plantedFromSeed || !SaplingTreeParamConfig.Instance.saplingParameters.Exists(sapP => sapP.treeType == instTreeType))
             {
-                // basically will not affect other trees
                 return;
             }
+            
+            ICoreServerAPI sapi = __instance.Api as ICoreServerAPI;
+            SaplingParameters rcc = SaplingTreeParamConfig.Instance.saplingParameters.Find(saplingParameters => saplingParameters.treeType == instTreeType);
+            
+            if (!rcc.ignoreColdTemp && temperature < 5f) return;
+
             // Access private fields not normally available through reflection
             Type typ = typeof(BlockEntitySapling);
 
@@ -47,10 +55,7 @@ namespace SaplingTreeParams2
             PropertyInfo propNextStageDaysRnd = typ.GetProperty("nextStageDaysRnd", BindingFlags.NonPublic | BindingFlags.Instance);
             NatFloat nextStageDaysRnd = (NatFloat)propNextStageDaysRnd.GetValue(__instance);
 
-
-            // Original code
-            if (__instance.Api.World.Calendar.TotalHours < totalHoursTillGrowth)
-                return;
+            if (__instance.Api.World.Calendar.TotalHours < totalHoursTillGrowth) return;
 
             if (stage == EnumTreeGrowthStage.Seed)
             {
@@ -95,6 +100,7 @@ namespace SaplingTreeParams2
             __instance.Api.World.BlockAccessor.SetBlock(0, __instance.Pos);
             __instance.Api.World.BulkBlockAccessor.ReadFromStagedByDefault = true;
             //float size = 0.6f + (float)__instance.Api.World.Rand.Next(0, (int) rcc.size) * 0.5f;
+            
             float size = 0.6f + (float)__instance.Api.World.Rand.NextDouble() * rcc.size;
 
             TreeGenParams pa = new TreeGenParams()

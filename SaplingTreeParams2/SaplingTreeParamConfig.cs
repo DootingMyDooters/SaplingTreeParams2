@@ -6,20 +6,25 @@ using System.Threading.Tasks;
 
 namespace SaplingTreeParams2
 {
-    public class SaplingTreeParamConfig
+    public sealed class SaplingTreeParamConfig
     {
-        public bool skipForestFloor;
-        public float size;
-        public float otherBlockChance;
-        public float vinesGrowthChance;
-        public float mossGrowthChance;
-        public SaplingTreeParamConfig()
+        public List<SaplingParameters> saplingParameters;   
+        private static SaplingTreeParamConfig instance = null;
+        private static readonly object padlock = new object();
+        public SaplingTreeParamConfig(){}
+        public static SaplingTreeParamConfig Instance
         {
-            skipForestFloor = true;
-            size = 1;
-            otherBlockChance = 1;
-            vinesGrowthChance = 0.01f;
-            mossGrowthChance = 0.02f;
+            get
+            {
+                lock (padlock)
+                {
+                    if (instance == null)
+                    {
+                        instance = new SaplingTreeParamConfig();
+                    }
+                    return instance;
+                }
+            }
         }
     }
 }
