@@ -5,8 +5,8 @@
     "authors": [
         "Dooters"
     ],
-    "description": "Change a few parameters of pines and acacias that grow from saplings",
-    "version": "1.0.0",
+    "description": "Change a few growth parameters for tree saplings",
+    "version": "1.0.1",
     "dependencies": {
         "game": ""
     }
