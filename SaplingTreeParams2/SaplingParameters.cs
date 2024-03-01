@@ -15,15 +15,48 @@ namespace SaplingTreeParams2
         public float vinesGrowthChance;
         public float mossGrowthChance;
         public bool ignoreColdTemp;
-        public SaplingParameters() {
-            treeType = "pine";
-            skipForestFloor = true;
-            size = 1;
-            otherBlockChance = 1;
-            vinesGrowthChance = 0.01f;
-            mossGrowthChance = 0.02f;
-            ignoreColdTemp = true;
+
+        public SaplingParameters(
+                string treeType = "pine", 
+                bool skipForestFloor = true, 
+                float size = 1, 
+                float otherBlockChance = 1, 
+                float vinesGrowthChance = 0.01f, 
+                float mossGrowthChance = 0.02f, 
+                bool ignoreColdTemp = true
+            )
+        {
+            this.treeType = treeType;
+            this.skipForestFloor = skipForestFloor;
+            this.size = size;
+            this.otherBlockChance = otherBlockChance;
+            this.vinesGrowthChance = vinesGrowthChance;
+            this.mossGrowthChance = mossGrowthChance;
+            this.ignoreColdTemp = ignoreColdTemp;
         }
-        
+
+        public void SetSaplingParameters(SaplingParameters saplingParameters)
+        {
+            this.treeType = saplingParameters.treeType;
+            this.skipForestFloor = saplingParameters.skipForestFloor;
+            this.size = saplingParameters.size;
+            this.otherBlockChance = saplingParameters.otherBlockChance;
+            this.vinesGrowthChance = saplingParameters.vinesGrowthChance;
+            this.mossGrowthChance = saplingParameters.mossGrowthChance;
+            this.ignoreColdTemp = saplingParameters.ignoreColdTemp;
+        }
+
+        public String prettyString()
+        {
+            return "(\n" +
+                "\ttreeType: " + this.treeType + "\n" +
+                "\tskipForestFloor: " + this.skipForestFloor + "\n" +
+                "\tsize: " + this.size + "\n" +
+                "\totherBlockChance: " + this.otherBlockChance + "\n" +
+                "\tvinesGrowthChance: " + this.vinesGrowthChance + "\n" +
+                "\tmossGrowthChance: " + this.mossGrowthChance + "\n" +
+                "\tignoreColdTemp: " + this.ignoreColdTemp + "\n" +
+                ")";
+        }
     }
 }

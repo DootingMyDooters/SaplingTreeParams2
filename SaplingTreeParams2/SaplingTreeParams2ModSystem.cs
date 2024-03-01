@@ -49,21 +49,36 @@ namespace SaplingTreeParams2
                 config.saplingParameters = new List<SaplingParameters>() { new SaplingParameters() };
                 api.StoreModConfig(config.saplingParameters, configFileName);
             }
+            api.Logger.Event("config loaded: ");
             foreach (SaplingParameters saplingParameters in config.saplingParameters)
             {
-                api.Logger.Event(
-                "config loaded (\n" +
-                    "\ttreeType: " + saplingParameters.treeType + ",\n" +
-                    "\tskipForestFloor: " + saplingParameters.skipForestFloor + ",\n" +
-                    "\tsize: " + saplingParameters.size + ",\n" +
-                    "\totherBlockChance: " + saplingParameters.otherBlockChance + "\n" +
-                    "\tvinesGrowthChance: " + saplingParameters.vinesGrowthChance + "\n" +
-                    "\tmossGrowthChance: " + saplingParameters.mossGrowthChance + "\n" +
-                    "\tignoreColdTemp: " + saplingParameters.ignoreColdTemp + "\n" +
-                ")"
-             );
+                api.Logger.Event(saplingParameters.prettyString());
             }
             
+        }
+
+        public void SetupCommand()
+        {
+            SaplingCommandHandler.config = config;
+            SaplingCommandHandler.api = api;
+            api.ChatCommands.GetOrCreate("sapconfig")
+                .RequiresPrivilege(Privilege.commandplayer)
+                .BeginSubCommand("add")
+                    .WithArgs(
+                        api.ChatCommands.Parsers.Word("treeconfig", new string[] {"[type=pine]", "[type=acacia,sff=false,ic=true]"})
+                    )
+                    .HandleWith((args) => SaplingCommandHandler.addSaplingConfig(args, configFileName))
+                .EndSubCommand()
+                .BeginSubCommand("remove")
+                    .WithArgs(
+                        api.ChatCommands.Parsers.Word("treeconfig")
+                    )
+                    .HandleWith((args) => SaplingCommandHandler.removeSaplingConfig(args))
+                .EndSubCommand()
+                .BeginSubCommand("show")
+                    .HandleWith((args) => SaplingCommandHandler.printConfig())
+                .EndSubCommand();
+
         }
 
         public override void Start(ICoreAPI api)
@@ -75,7 +90,7 @@ namespace SaplingTreeParams2
         public override void StartServerSide(ICoreServerAPI api)
         {
             SetupConfig();
-
+            SetupCommand();
             // Apply patches with harmony
             if (!Harmony.HasAnyPatches(Mod.Info.ModID))
             {
