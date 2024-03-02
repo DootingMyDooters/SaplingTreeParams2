@@ -8,6 +8,7 @@ using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 using static System.Net.Mime.MediaTypeNames;
 using System.Collections.Generic;
+using System.Linq;
 
 [assembly: ModInfo("SaplingTreeParams2",
                     Authors = new string[] { "Dooters" },
@@ -49,11 +50,7 @@ namespace SaplingTreeParams2
                 config.saplingParameters = new List<SaplingParameters>() { new SaplingParameters() };
                 api.StoreModConfig(config.saplingParameters, configFileName);
             }
-            api.Logger.Event("config loaded: ");
-            foreach (SaplingParameters saplingParameters in config.saplingParameters)
-            {
-                api.Logger.Event(saplingParameters.prettyString());
-            }
+            api.Logger.Event("config loaded: " + String.Join(",\n", config.saplingParameters.Select(sap => sap.prettyString())));
             
         }
 
