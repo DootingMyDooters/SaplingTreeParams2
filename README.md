@@ -39,3 +39,19 @@ current mod loads config once at game startup.
   }, ...
 ]
 ```
+## Commands
+```/sapconfig <sub-command>```
+### Sub-Commands
+```
+/sapconfig add [type=birch,sff=true,size=0.3,obc=1,vgc=0.01,mgc=0.02,ic=true]
+/sapconfig add [type=birch,size=0.5]
+/sapconfig show
+/sapconfig remove birch
+/sapconfig show
+```
+### Help Related
+```
+/help sapconfig
+/help sapconfig add
+/help sapconfig remove
+```
