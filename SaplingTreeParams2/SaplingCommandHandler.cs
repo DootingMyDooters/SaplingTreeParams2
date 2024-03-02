@@ -38,16 +38,20 @@ namespace SaplingTreeParams2
 
                 foreach (String paramName in paramNames)
                 {
-                    int startIndex = strippedParams.IndexOf(paramName + "=");
-                    if (startIndex < 0) {
+                    String searchValue = paramName + "=";
+                    int foundIndex = strippedParams.IndexOf(searchValue);
+                    if (foundIndex < 0)
+                    {
                         if (paramName != "type") continue;
                         else return TextCommandResult.Error("missing \"type\" parameter.");
                     }
-                    int endIndex = strippedParams.IndexOf(",", startIndex + (paramName + "=").Length);
+                    int startIndex = foundIndex + searchValue.Length;
+                    int endIndex = strippedParams.IndexOf(",", startIndex);
                     if (endIndex < 0) {
                         endIndex = strippedParams.Length;
                     }
-                    String paramValue = strippedParams.Substring(startIndex, endIndex);
+                    int valueLength = endIndex - startIndex;
+                    String paramValue = strippedParams.Substring(startIndex, valueLength);
                     try
                     {
                         switch (paramName)
@@ -129,7 +133,7 @@ namespace SaplingTreeParams2
 
         public TextCommandResult printConfig()
         {
-            return TextCommandResult.Success(String.Join(",\n", config.saplingParameters.Select(sap => sap.prettyString())));
+            return TextCommandResult.Success("full config:\n" + String.Join(",\n", config.saplingParameters.Select(sap => sap.prettyString())));
         }
     }
 }
