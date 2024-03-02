@@ -9,67 +9,87 @@ using Vintagestory.API.Util;
 
 namespace SaplingTreeParams2
 {
-    public static class SaplingCommandHandler
+    public class SaplingCommandHandler
     {
-        public static SaplingTreeParamConfig config;
-        public static ILogger logger;
-        public static ICoreAPI api;
+        private SaplingTreeParamConfig config = SaplingTreeParamConfig.Instance;
+        private ICoreAPI api;
+        private String configFileName;
+        private String[] paramNames = new string[] { "type", "sff", "size", "obc", "vgc", "mgc", "ic" };
 
-        public static TextCommandResult addSaplingConfig(TextCommandCallingArgs args, String fileName)
+        public SaplingCommandHandler(ICoreAPI api, string configFileName)
         {
-            SaplingParameters saplingParameters = new SaplingParameters();
+            this.api = api;
+            this.configFileName = configFileName;
+        }
+
+        public TextCommandResult addSaplingConfig(TextCommandCallingArgs args)
+        {
+            SaplingParameters currSapParams = new SaplingParameters();
             bool changeExistingConfig = false;
             if (args.Parsers != null && args.Parsers.Count > 0) {
                 ICommandArgumentParser commandArgumentParser = args.Parsers[0];
                 String commandValue = ((String)commandArgumentParser.GetValue()).Trim();
 
-                // Regex reg = new Regex(@"^\[type=\w+((,sff=(on|off|true|false|on|off|0|1))?(,size=[0-9](\.[0-9]+)?)?(,obc=[0-9](\.[0-9]+)?)(,vgc=[0-9](\.[0-9]+)?)(,mgc=[0-9](\.[0-9]+)?)?)(,ic=(on|off|true|false|on|off|0|1))?\]$");
-
-                //if (!reg.IsMatch(commandValue)) return TextCommandResult.Error("wrong parameter syntax");
                 if (!commandValue.StartsWith("[") || !commandValue.EndsWith("]")) 
                     return TextCommandResult.Error("parameter list should start with [ and end with ]");
 
                 String strippedParams = commandValue.Substring(1, commandValue.Length - 2);
-                String[] splitParams = strippedParams.Split(",");
+                if (strippedParams.Split(",").Length < 1) return TextCommandResult.Error("no parameters provided!");
 
-
-                foreach (String command in splitParams)
+                foreach (String paramName in paramNames)
                 {
-                    String[] splitCommand = command.Trim().Split("=");
-                    String ParamName = splitCommand[0].Trim();
-                    String ParamValue = splitCommand[1].Trim();
-                    switch (ParamName)
+                    int startIndex = strippedParams.IndexOf(paramName + "=");
+                    if (startIndex < 0) {
+                        if (paramName != "type") continue;
+                        else return TextCommandResult.Error("missing \"type\" parameter.");
+                    }
+                    int endIndex = strippedParams.IndexOf(",", startIndex + (paramName + "=").Length);
+                    if (endIndex < 0) {
+                        endIndex = strippedParams.Length;
+                    }
+                    String paramValue = strippedParams.Substring(startIndex, endIndex);
+                    try
                     {
-                        case "type":
-                            if (config.saplingParameters.Exists(sap => sap.treeType.Equals(ParamValue)))
-                            {
-                                changeExistingConfig = true;
-                            }
-                            else
-                            {
-                                saplingParameters.treeType = ParamValue;
-                            }
-                            break;
-                        case "sff":
-                            saplingParameters.skipForestFloor = ParamValue.ToBool();
-                            break;
-                        case "size":
-                            saplingParameters.size = ParamValue.ToFloat();
-                            break;
-                        case "obc":
-                            saplingParameters.otherBlockChance = ParamValue.ToFloat();
-                            break;
-                        case "vgc":
-                            saplingParameters.vinesGrowthChance = ParamValue.ToFloat();
-                            break;
-                        case "mgc":
-                            saplingParameters.mossGrowthChance = ParamValue.ToFloat();
-                            break;
-                        case "ic":
-                            saplingParameters.ignoreColdTemp = ParamValue.ToBool();
-                            break;
-                        default:
-                            return TextCommandResult.Error("wrong parameter passed.");
+                        switch (paramName)
+                        {
+                            case "type":
+                                if (config.saplingParameters.Exists(sap => sap.treeType.Equals(paramValue)))
+                                {
+                                    currSapParams.SetSaplingParameters(config.saplingParameters.Find(sap => sap.treeType.Equals(paramValue)));
+                                    changeExistingConfig = true;
+                                }
+                                else
+                                {
+                                    currSapParams.treeType = paramValue;
+                                }
+                                break;
+                            case "sff":
+                                currSapParams.skipForestFloor = paramValue.ToBool();
+                                break;
+                            case "size":
+                                currSapParams.size = paramValue.ToFloat();
+                                break;
+                            case "obc":
+                                currSapParams.otherBlockChance = paramValue.ToFloat();
+                                break;
+                            case "vgc":
+                                currSapParams.vinesGrowthChance = paramValue.ToFloat();
+                                break;
+                            case "mgc":
+                                currSapParams.mossGrowthChance = paramValue.ToFloat();
+                                break;
+                            case "ic":
+                                currSapParams.ignoreColdTemp = paramValue.ToBool();
+                                break;
+                            default:
+                                return TextCommandResult.Error("how did you get here???");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        api.Logger.Error(ex);
+                        return TextCommandResult.Error("Could not set " + paramName + " to " +  paramValue + ".\n" +
+                            "Please check the logs.");
                     }
                 }
             }
@@ -79,36 +99,37 @@ namespace SaplingTreeParams2
             }
             if (changeExistingConfig)
             {
-                config.saplingParameters.Find(sap => sap.treeType == saplingParameters.treeType).SetSaplingParameters(saplingParameters);
-                api.StoreModConfig(config.saplingParameters, fileName);
-                return TextCommandResult.Success("config for tree type " + saplingParameters.treeType + " changed to: " + saplingParameters.prettyString());
+                config.saplingParameters.Find(sap => sap.treeType == currSapParams.treeType).SetSaplingParameters(currSapParams);
+                api.StoreModConfig(config.saplingParameters, configFileName);
+                return TextCommandResult.Success("config for tree type \"" + currSapParams.treeType + "\" changed to: " + currSapParams.prettyString());
             }
             else
             {
-                config.saplingParameters.Add(saplingParameters);
-                api.StoreModConfig(config.saplingParameters, fileName);
-                return TextCommandResult.Success("config for tree type " + saplingParameters.treeType + " added: " + saplingParameters.prettyString());
+                config.saplingParameters.Add(currSapParams);
+                api.StoreModConfig(config.saplingParameters, configFileName);
+                return TextCommandResult.Success("config for tree type " + currSapParams.treeType + " added: " + currSapParams.prettyString());
             }
         }
 
-        public static TextCommandResult removeSaplingConfig(TextCommandCallingArgs args)
+        public TextCommandResult removeSaplingConfig(TextCommandCallingArgs args)
         {
             if (config.saplingParameters.Exists(sap => sap.treeType.Equals((String)args.Parsers.First().GetValue())))
             {
                 config.saplingParameters.Remove(
                     config.saplingParameters.Find(sap => sap.treeType.Equals((String)args.Parsers.First().GetValue()))
                 );
-                return TextCommandResult.Success("removed config for treeType: " + (String)args.Parsers.First().GetValue());
+                api.StoreModConfig(config.saplingParameters, configFileName);
+                return TextCommandResult.Success("removed config for tree type: " + (String)args.Parsers.First().GetValue());
             }
             else
             {
-                return TextCommandResult.Error("this treeType doesn't exist in the config: " + (String)args.Parsers.First().GetValue());
+                return TextCommandResult.Error("this tree type doesn't exist in the config: " + (String)args.Parsers.First().GetValue());
             }
         }
 
-        public static TextCommandResult printConfig()
+        public TextCommandResult printConfig()
         {
-            return TextCommandResult.Success(String.Join(",", config.saplingParameters.Select(sap => sap.prettyString())));
+            return TextCommandResult.Success(String.Join(",\n", config.saplingParameters.Select(sap => sap.prettyString())));
         }
     }
 }

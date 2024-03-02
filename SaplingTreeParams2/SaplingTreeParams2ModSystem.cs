@@ -59,24 +59,25 @@ namespace SaplingTreeParams2
 
         public void SetupCommand()
         {
-            SaplingCommandHandler.config = config;
-            SaplingCommandHandler.api = api;
+            SaplingCommandHandler handler = new SaplingCommandHandler(api, configFileName);
             api.ChatCommands.GetOrCreate("sapconfig")
                 .RequiresPrivilege(Privilege.commandplayer)
                 .BeginSubCommand("add")
+                .WithDescription("add a tree sapling configuration to the existing file")
                     .WithArgs(
-                        api.ChatCommands.Parsers.Word("treeconfig", new string[] {"[type=pine]", "[type=acacia,sff=false,ic=true]"})
+                        api.ChatCommands.Parsers.Word("treeconfig", new string[] {"[type=pine]", "[type=acacia,sff=false,ic=true]", "[type=birch,sff=true,size=0.3,obc=1,vgc=0.01,mgc=0.02,ic=true]"})
                     )
-                    .HandleWith((args) => SaplingCommandHandler.addSaplingConfig(args, configFileName))
+                    .HandleWith((args) => handler.addSaplingConfig(args))
                 .EndSubCommand()
                 .BeginSubCommand("remove")
+                .WithDescription("remove a tree sapling configuration from the existing file using the tree name")
                     .WithArgs(
-                        api.ChatCommands.Parsers.Word("treeconfig")
+                        api.ChatCommands.Parsers.Word("type", new string[] {"pine", "birch", "acacia", "oak", "larch", "baldcypress", "purpleheart"})
                     )
-                    .HandleWith((args) => SaplingCommandHandler.removeSaplingConfig(args))
+                    .HandleWith((args) => handler.removeSaplingConfig(args))
                 .EndSubCommand()
                 .BeginSubCommand("show")
-                    .HandleWith((args) => SaplingCommandHandler.printConfig())
+                    .HandleWith((args) => handler.printConfig())
                 .EndSubCommand();
 
         }

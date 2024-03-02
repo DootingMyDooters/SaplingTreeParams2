@@ -48,15 +48,14 @@ namespace SaplingTreeParams2
 
         public String prettyString()
         {
-            return "(\n" +
-                "\ttreeType: " + this.treeType + "\n" +
-                "\tskipForestFloor: " + this.skipForestFloor + "\n" +
-                "\tsize: " + this.size + "\n" +
-                "\totherBlockChance: " + this.otherBlockChance + "\n" +
-                "\tvinesGrowthChance: " + this.vinesGrowthChance + "\n" +
-                "\tmossGrowthChance: " + this.mossGrowthChance + "\n" +
-                "\tignoreColdTemp: " + this.ignoreColdTemp + "\n" +
-                ")";
+            return "(\n\ttreeType: " + this.treeType +
+                "\n\tskipForestFloor: " + this.skipForestFloor +
+                "\n\tsize: " + this.size +
+                "\n\totherBlockChance: " + this.otherBlockChance +
+                "\n\tvinesGrowthChance: " + this.vinesGrowthChance +
+                "\n\tmossGrowthChance: " + this.mossGrowthChance +
+                "\n\tignoreColdTemp: " + this.ignoreColdTemp +
+                "\n)";
         }
     }
 }
