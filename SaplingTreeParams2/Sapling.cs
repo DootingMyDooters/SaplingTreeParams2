@@ -55,16 +55,20 @@ namespace SaplingTreeParams2
             PropertyInfo propNextStageDaysRnd = typ.GetProperty("nextStageDaysRnd", BindingFlags.NonPublic | BindingFlags.Instance);
             NatFloat nextStageDaysRnd = (NatFloat)propNextStageDaysRnd.GetValue(__instance);
 
-            if (__instance.Api.World.Calendar.TotalHours < totalHoursTillGrowth) return;
+            if (stage == EnumTreeGrowthStage.Seed || __instance.Api.World.Calendar.TotalHours < totalHoursTillGrowth) return;
 
-            if (stage == EnumTreeGrowthStage.Seed)
-            {
-                //fieldStage.SetValue(__instance, EnumTreeGrowthStage.Sapling);
-                __instance.stage = EnumTreeGrowthStage.Sapling;
-                fieldTotalHoursTillGrowth.SetValue(__instance, __instance.Api.World.Calendar.TotalHours + nextStageDaysRnd.nextFloat(1, __instance.Api.World.Rand) * 24 * growthRateMod);
-                __instance.MarkDirty(true);
-                return;
-            }
+            /* 
+             * this section is left for future features if possible 
+             * can't access sapling's totalHoursTillGrowth, unfortunately.
+             */
+            // if (stage == EnumTreeGrowthStage.Seed)
+            //{
+            //    __instance.stage = EnumTreeGrowthStage.Sapling;
+            //    fieldTotalHoursTillGrowth.SetValue(__instance, 
+            //        (long)(__instance.Api.World.Calendar.TotalHours + (double)nextStageDaysRnd.nextFloat(1f, __instance.Api.World.Rand) * 24f * growthRateMod));
+            //    __instance.MarkDirty(redrawOnClient: true);
+            //    return;
+            //}
 
             int chunksize = __instance.Api.World.BlockAccessor.ChunkSize;
             foreach (BlockFacing facing in BlockFacing.HORIZONTALS)
