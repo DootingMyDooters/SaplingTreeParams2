@@ -18,11 +18,18 @@ namespace SaplingTreeParams2
     public class Sapling
     {
 
+        private static NormalRandom normalRandom;
+
         static void Prefix(float dt, ref BlockEntitySapling __instance)
         {
             String instTreeType = __instance.Block.Variant["wood"];
             float temperature = __instance.Api.World.BlockAccessor.GetClimateAt(__instance.Pos, EnumGetClimateMode.NowValues).Temperature;
             
+            if (__instance.Api is ICoreServerAPI && normalRandom == null)
+            {
+                normalRandom = new NormalRandom(__instance.Api.World.Seed);
+            }
+
             // doesn't affect naturally(?) occurring saplings or ones that aren't in the config.
             if (!__instance.plantedFromSeed || !SaplingTreeParamConfig.Instance.saplingParameters.Exists(sapP => sapP.treeType == instTreeType))
             {
@@ -70,15 +77,15 @@ namespace SaplingTreeParams2
             //    return;
             //}
 
-            int chunksize = __instance.Api.World.BlockAccessor.ChunkSize;
-            foreach (BlockFacing facing in BlockFacing.HORIZONTALS)
+            BlockFacing[] hORIZONTALS = BlockFacing.HORIZONTALS;
+            for (int i = 0; i < hORIZONTALS.Length; i++)
             {
-                Vec3i dir = facing.Normali;
-                int x = __instance.Pos.X + dir.X * chunksize;
-                int z = __instance.Pos.Z + dir.Z * chunksize;
+                Vec3i normali = hORIZONTALS[i].Normali;
+                int posX = __instance.Pos.X + normali.X * 32;
+                int posZ = __instance.Pos.Z + normali.Z * 32;
 
                 // Not at world edge and chunk is not loaded? We must be at the edge of loaded chunks. Wait until more chunks are generated
-                if (__instance.Api.World.BlockAccessor.IsValidPos(x, __instance.Pos.Y, z) && __instance.Api.World.BlockAccessor.GetChunkAtBlockPos(x, __instance.Pos.Y, z) == null)
+                if (__instance.Api.World.BlockAccessor.IsValidPos(posX, __instance.Pos.InternalY, posZ) && __instance.Api.World.BlockAccessor.GetChunkAtBlockPos(posX, __instance.Pos.InternalY, posZ) == null)
                     return;
             }
 
@@ -116,7 +123,7 @@ namespace SaplingTreeParams2
                 mossGrowthChance = rcc.mossGrowthChance
             };
 
-            sapi.World.TreeGenerators[code].GrowTree(__instance.Api.World.BulkBlockAccessor, __instance.Pos.DownCopy(), pa);
+            sapi.World.TreeGenerators[code].GrowTree(__instance.Api.World.BulkBlockAccessor, __instance.Pos.DownCopy(), pa, normalRandom);
             __instance.Api.World.BulkBlockAccessor.Commit();
 
             return;
