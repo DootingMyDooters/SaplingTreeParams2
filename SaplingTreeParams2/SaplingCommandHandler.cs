@@ -24,10 +24,10 @@ namespace SaplingTreeParams2
             this.api = api;
             this.configFileName = configFileName;
             LoadTreeTypeList();
-            this.initCommand();
+            this.InitCommand();
         }
 
-        private void initCommand()
+        private void InitCommand()
         {
             this.api.ChatCommands.GetOrCreate("sapconfig")
                 .WithDescription("add/remove/show/listtreetypes sapling growth configurations.")
