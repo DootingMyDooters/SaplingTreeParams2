@@ -58,7 +58,7 @@ namespace SaplingTreeParams2
         {
             SaplingCommandHandler handler = new SaplingCommandHandler(api, configFileName);
             api.ChatCommands.GetOrCreate("sapconfig")
-                .WithDescription("add/remove/show/listtreetype sapling growth configurations.")
+                .WithDescription("add/remove/show/listtreetypes sapling growth configurations.")
                 .RequiresPrivilege(Privilege.commandplayer)
                 .BeginSubCommand("add")
                 .WithDescription("add/change a tree sapling configuration in the existing config(this also affects the file!)")
