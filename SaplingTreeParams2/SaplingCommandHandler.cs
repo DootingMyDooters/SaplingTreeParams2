@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
+using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 
 namespace SaplingTreeParams2
@@ -23,6 +24,52 @@ namespace SaplingTreeParams2
             this.api = api;
             this.configFileName = configFileName;
             LoadTreeTypeList();
+            this.initCommand();
+        }
+
+        private void initCommand()
+        {
+            this.api.ChatCommands.GetOrCreate("sapconfig")
+                .WithDescription("add/remove/show/listtreetypes sapling growth configurations.")
+                .RequiresPrivilege(Privilege.commandplayer)
+                .BeginSubCommand("add")
+                .WithDescription("add/change a tree sapling configuration in the existing config(this also affects the file!)")
+                .WithAdditionalInformation("parameters are:" +
+                    "\n\ttype(tree type) (required) - only trees that can grow from seeds." +
+                    "\n\tsff(skipForestFloor) - true by default." +
+                    "\n\tsize - 1 by default, sizes between 0.1 and 1 are recommended." +
+                    "\n\tobc(otherBlockChance - 1 by default, sizes between 0.1 and 1 are recommended. this affects resin for trees that can spawn it.)" +
+                    "\n\tvgc(vinesGrowthChance) - 0.01 by default." +
+                    "\n\tmgc(mossGrowChance) - 0.02 by default." +
+                    "\n\tic(ignoreColdTemp) - true by default." +
+                    "\nomitted parameters will be set to their default values.")
+                    .WithExamples(new string[]
+                    {
+                        "/sapconfig add [type=birch,sff=true,size=0.3,obc=1,vgc=0.01,mgc=0.02,ic=true]",
+                        "/sapconfig add [type=pine]",
+                        "/sapconfig add [type=acacia,sff=false,ic=true]"
+                    })
+                    .WithArgs(
+                        api.ChatCommands.Parsers.Word("treeconfig", new string[] { "[type=pine]", "[type=acacia,sff=false,ic=true]" })
+                    )
+                    .HandleWith((args) => this.addSaplingConfig(args))
+                .EndSubCommand()
+                .BeginSubCommand("remove")
+                .WithDescription("remove a tree sapling configuration from the existing file using the tree name")
+                .WithExamples("/sapconfig remove acacia")
+                    .WithArgs(
+                        api.ChatCommands.Parsers.Word("type", new string[] { "pine", "birch", "acacia", "oak", "larch", "baldcypress", "purpleheart" })
+                    )
+                    .HandleWith((args) => this.removeSaplingConfig(args))
+                .EndSubCommand()
+                .BeginSubCommand("show")
+                .WithDescription("show current sapling configurations")
+                    .HandleWith((args) => this.printConfig())
+                .EndSubCommand()
+                .BeginSubCommand("listtreetypes")
+                .WithDescription("list tree types that can be planted")
+                .HandleWith((args) => this.printTreeTypeList())
+                .EndSubCommand();
         }
 
         private void LoadTreeTypeList()
@@ -148,7 +195,7 @@ namespace SaplingTreeParams2
 
         public TextCommandResult printTreeTypeList()
         {
-            return TextCommandResult.Success(String.Join(",", treeTypeList));
+            return TextCommandResult.Success(String.Join(", ", treeTypeList));
         }
     }
 }
