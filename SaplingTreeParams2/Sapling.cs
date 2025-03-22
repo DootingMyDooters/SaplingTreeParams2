@@ -54,28 +54,11 @@ namespace SaplingTreeParams2
             FieldInfo fieldGrowListenerId = typ.GetField("growListenerId", BindingFlags.NonPublic | BindingFlags.Instance);
             long growListenerId = (long)fieldGrowListenerId.GetValue(__instance);
 
-            // Retrieve property GrowthRateMod
-            PropertyInfo propGrowthRateMod = typ.GetProperty("GrowthRateMod", BindingFlags.NonPublic | BindingFlags.Instance);
-            float growthRateMod = (float)propGrowthRateMod.GetValue(__instance);
-
             // Retrieve property nextStageDaysRnd
             PropertyInfo propNextStageDaysRnd = typ.GetProperty("nextStageDaysRnd", BindingFlags.NonPublic | BindingFlags.Instance);
             NatFloat nextStageDaysRnd = (NatFloat)propNextStageDaysRnd.GetValue(__instance);
 
             if (stage == EnumTreeGrowthStage.Seed || __instance.Api.World.Calendar.TotalHours < totalHoursTillGrowth) return;
-
-            /* 
-             * this section is left for future features if possible 
-             * can't access sapling's totalHoursTillGrowth, unfortunately.
-             */
-            // if (stage == EnumTreeGrowthStage.Seed)
-            //{
-            //    __instance.stage = EnumTreeGrowthStage.Sapling;
-            //    fieldTotalHoursTillGrowth.SetValue(__instance, 
-            //        (long)(__instance.Api.World.Calendar.TotalHours + (double)nextStageDaysRnd.nextFloat(1f, __instance.Api.World.Rand) * 24f * growthRateMod));
-            //    __instance.MarkDirty(redrawOnClient: true);
-            //    return;
-            //}
 
             BlockFacing[] hORIZONTALS = BlockFacing.HORIZONTALS;
             for (int i = 0; i < hORIZONTALS.Length; i++)
