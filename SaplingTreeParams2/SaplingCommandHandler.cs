@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using Vintagestory.API.Util;
 
 namespace SaplingTreeParams2
@@ -15,11 +16,20 @@ namespace SaplingTreeParams2
         private ICoreAPI api;
         private String configFileName;
         private String[] paramNames = new string[] { "type", "sff", "size", "obc", "vgc", "mgc", "ic" };
+        private List<string> treeTypeList = new List<string>();
 
         public SaplingCommandHandler(ICoreAPI api, string configFileName)
         {
             this.api = api;
             this.configFileName = configFileName;
+            LoadTreeTypeList();
+        }
+
+        private void LoadTreeTypeList()
+        {
+            Lang.GetAllEntries().Keys.Foreach((string key) => {
+                if (key.Contains("treeseed-planted-")) treeTypeList.Add(key.Split("-")[2]);
+            });
         }
 
         public TextCommandResult addSaplingConfig(TextCommandCallingArgs args)
@@ -134,6 +144,11 @@ namespace SaplingTreeParams2
         public TextCommandResult printConfig()
         {
             return TextCommandResult.Success("full config:\n" + String.Join(",\n", config.saplingParameters.Select(sap => sap.prettyString())));
+        }
+
+        public TextCommandResult printTreeTypeList()
+        {
+            return TextCommandResult.Success(String.Join(",", treeTypeList));
         }
     }
 }
