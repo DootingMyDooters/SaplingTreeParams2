@@ -10,7 +10,7 @@ using SaplingTreeParams2.Config;
 [assembly: ModInfo("SaplingTreeParams2",
                     Authors = new string[] { "Dooters" },
                     Description = "Change a few growth parameters for tree saplings",
-                    Version = "1.0.5")]
+                    Version = "1.0.6")]
 namespace SaplingTreeParams2.Systems
 {
     public class SaplingTreeParams2ModSystem : ModSystem
