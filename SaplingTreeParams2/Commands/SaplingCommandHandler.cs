@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SaplingTreeParams2.Config;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,14 +10,14 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 
-namespace SaplingTreeParams2
+namespace SaplingTreeParams2.Commands
 {
     public class SaplingCommandHandler
     {
         private SaplingTreeParamConfig config = SaplingTreeParamConfig.Instance;
         private ICoreAPI api;
-        private String configFileName;
-        private String[] paramNames = new string[] { "type", "sff", "size", "obc", "vgc", "mgc", "ic" };
+        private string configFileName;
+        private string[] paramNames = new string[] { "type", "sff", "size", "obc", "vgc", "mgc", "ic" };
         private List<string> treeTypeList = new List<string>();
 
         public SaplingCommandHandler(ICoreAPI api, string configFileName)
@@ -24,12 +25,12 @@ namespace SaplingTreeParams2
             this.api = api;
             this.configFileName = configFileName;
             LoadTreeTypeList();
-            this.InitCommand();
+            InitCommand();
         }
 
         private void InitCommand()
         {
-            this.api.ChatCommands.GetOrCreate("sapconfig")
+            api.ChatCommands.GetOrCreate("sapconfig")
                 .WithDescription("add/remove/show/listtreetypes sapling growth configurations.")
                 .RequiresPrivilege(Privilege.commandplayer)
                 .BeginSubCommand("add")
@@ -52,7 +53,7 @@ namespace SaplingTreeParams2
                     .WithArgs(
                         api.ChatCommands.Parsers.Word("treeconfig", new string[] { "[type=pine]", "[type=acacia,sff=false,ic=true]" })
                     )
-                    .HandleWith((args) => this.addSaplingConfig(args))
+                    .HandleWith((args) => addSaplingConfig(args))
                 .EndSubCommand()
                 .BeginSubCommand("remove")
                 .WithDescription("remove a tree sapling configuration from the existing file using the tree name")
@@ -60,21 +61,22 @@ namespace SaplingTreeParams2
                     .WithArgs(
                         api.ChatCommands.Parsers.Word("type", new string[] { "pine", "birch", "acacia", "oak", "larch", "baldcypress", "purpleheart" })
                     )
-                    .HandleWith((args) => this.removeSaplingConfig(args))
+                    .HandleWith((args) => removeSaplingConfig(args))
                 .EndSubCommand()
                 .BeginSubCommand("show")
                 .WithDescription("show current sapling configurations")
-                    .HandleWith((args) => this.printConfig())
+                    .HandleWith((args) => printConfig())
                 .EndSubCommand()
                 .BeginSubCommand("listtreetypes")
                 .WithDescription("list tree types that can be planted")
-                .HandleWith((args) => this.printTreeTypeList())
+                .HandleWith((args) => printTreeTypeList())
                 .EndSubCommand();
         }
 
         private void LoadTreeTypeList()
         {
-            Lang.GetAllEntries().Keys.Foreach((string key) => {
+            Lang.GetAllEntries().Keys.Foreach((key) =>
+            {
                 if (key.Contains("treeseed-planted-")) treeTypeList.Add(key.Split("-")[2]);
             });
         }
@@ -83,19 +85,20 @@ namespace SaplingTreeParams2
         {
             SaplingParameters currSapParams = new SaplingParameters();
             bool changeExistingConfig = false;
-            if (args.Parsers != null && args.Parsers.Count > 0) {
+            if (args.Parsers != null && args.Parsers.Count > 0)
+            {
                 ICommandArgumentParser commandArgumentParser = args.Parsers[0];
-                String commandValue = ((String)commandArgumentParser.GetValue()).Trim();
+                string commandValue = ((string)commandArgumentParser.GetValue()).Trim();
 
-                if (!commandValue.StartsWith("[") || !commandValue.EndsWith("]")) 
+                if (!commandValue.StartsWith("[") || !commandValue.EndsWith("]"))
                     return TextCommandResult.Error("parameter list should start with [ and end with ]");
 
-                String strippedParams = commandValue.Substring(1, commandValue.Length - 2);
+                string strippedParams = commandValue.Substring(1, commandValue.Length - 2);
                 if (strippedParams.Split(",").Length < 1) return TextCommandResult.Error("no parameters provided!");
 
-                foreach (String paramName in paramNames)
+                foreach (string paramName in paramNames)
                 {
-                    String searchValue = paramName + "=";
+                    string searchValue = paramName + "=";
                     int foundIndex = strippedParams.IndexOf(searchValue);
                     if (foundIndex < 0)
                     {
@@ -104,16 +107,21 @@ namespace SaplingTreeParams2
                     }
                     int startIndex = foundIndex + searchValue.Length;
                     int endIndex = strippedParams.IndexOf(",", startIndex);
-                    if (endIndex < 0) {
+                    if (endIndex < 0)
+                    {
                         endIndex = strippedParams.Length;
                     }
                     int valueLength = endIndex - startIndex;
-                    String paramValue = strippedParams.Substring(startIndex, valueLength);
+                    string paramValue = strippedParams.Substring(startIndex, valueLength);
                     try
                     {
                         switch (paramName)
                         {
                             case "type":
+                                if (!treeTypeList.Contains(paramValue))
+                                {
+                                    throw new Exception("Wrong tree type");
+                                }
                                 if (config.saplingParameters.Exists(sap => sap.treeType.Equals(paramValue)))
                                 {
                                     currSapParams.SetSaplingParameters(config.saplingParameters.Find(sap => sap.treeType.Equals(paramValue)));
@@ -149,7 +157,7 @@ namespace SaplingTreeParams2
                     catch (Exception ex)
                     {
                         api.Logger.Error(ex);
-                        return TextCommandResult.Error("Could not set " + paramName + " to " +  paramValue + ".\n" +
+                        return TextCommandResult.Error("Could not set " + paramName + " to " + paramValue + ".\n" +
                             "Please check the logs.");
                     }
                 }
@@ -174,28 +182,28 @@ namespace SaplingTreeParams2
 
         public TextCommandResult removeSaplingConfig(TextCommandCallingArgs args)
         {
-            if (config.saplingParameters.Exists(sap => sap.treeType.Equals((String)args.Parsers.First().GetValue())))
+            if (config.saplingParameters.Exists(sap => sap.treeType.Equals((string)args.Parsers.First().GetValue())))
             {
                 config.saplingParameters.Remove(
-                    config.saplingParameters.Find(sap => sap.treeType.Equals((String)args.Parsers.First().GetValue()))
+                    config.saplingParameters.Find(sap => sap.treeType.Equals((string)args.Parsers.First().GetValue()))
                 );
                 api.StoreModConfig(config.saplingParameters, configFileName);
-                return TextCommandResult.Success("removed config for tree type: " + (String)args.Parsers.First().GetValue());
+                return TextCommandResult.Success("removed config for tree type: " + (string)args.Parsers.First().GetValue());
             }
             else
             {
-                return TextCommandResult.Error("this tree type doesn't exist in the config: " + (String)args.Parsers.First().GetValue());
+                return TextCommandResult.Error("this tree type doesn't exist in the config: " + (string)args.Parsers.First().GetValue());
             }
         }
 
         public TextCommandResult printConfig()
         {
-            return TextCommandResult.Success("full config:\n" + String.Join(",\n", config.saplingParameters.Select(sap => sap.prettyString())));
+            return TextCommandResult.Success("full config:\n" + string.Join(",\n", config.saplingParameters.Select(sap => sap.prettyString())));
         }
 
         public TextCommandResult printTreeTypeList()
         {
-            return TextCommandResult.Success(String.Join(", ", treeTypeList));
+            return TextCommandResult.Success(string.Join(", ", treeTypeList));
         }
     }
 }

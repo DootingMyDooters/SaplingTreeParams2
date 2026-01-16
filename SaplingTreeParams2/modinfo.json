@@ -6,7 +6,7 @@
         "Dooters"
     ],
     "description": "Change a few growth parameters for tree saplings",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "dependencies": {
         "game": ""
     }

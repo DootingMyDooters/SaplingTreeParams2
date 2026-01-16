@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SaplingTreeParams2
+﻿
+namespace SaplingTreeParams2.Config
 {
     public class SaplingParameters
     {
@@ -37,24 +32,24 @@ namespace SaplingTreeParams2
 
         public void SetSaplingParameters(SaplingParameters saplingParameters)
         {
-            this.treeType = saplingParameters.treeType;
-            this.skipForestFloor = saplingParameters.skipForestFloor;
-            this.size = saplingParameters.size;
-            this.otherBlockChance = saplingParameters.otherBlockChance;
-            this.vinesGrowthChance = saplingParameters.vinesGrowthChance;
-            this.mossGrowthChance = saplingParameters.mossGrowthChance;
-            this.ignoreColdTemp = saplingParameters.ignoreColdTemp;
+            treeType = saplingParameters.treeType;
+            skipForestFloor = saplingParameters.skipForestFloor;
+            size = saplingParameters.size;
+            otherBlockChance = saplingParameters.otherBlockChance;
+            vinesGrowthChance = saplingParameters.vinesGrowthChance;
+            mossGrowthChance = saplingParameters.mossGrowthChance;
+            ignoreColdTemp = saplingParameters.ignoreColdTemp;
         }
 
-        public String prettyString()
+        public string prettyString()
         {
-            return "(\n\ttreeType: " + this.treeType +
-                "\n\tskipForestFloor: " + this.skipForestFloor +
-                "\n\tsize: " + this.size +
-                "\n\totherBlockChance: " + this.otherBlockChance +
-                "\n\tvinesGrowthChance: " + this.vinesGrowthChance +
-                "\n\tmossGrowthChance: " + this.mossGrowthChance +
-                "\n\tignoreColdTemp: " + this.ignoreColdTemp +
+            return "(\n\ttreeType: " + treeType +
+                "\n\tskipForestFloor: " + skipForestFloor +
+                "\n\tsize: " + size +
+                "\n\totherBlockChance: " + otherBlockChance +
+                "\n\tvinesGrowthChance: " + vinesGrowthChance +
+                "\n\tmossGrowthChance: " + mossGrowthChance +
+                "\n\tignoreColdTemp: " + ignoreColdTemp +
                 "\n)";
         }
     }

@@ -1,18 +1,13 @@
 ﻿using HarmonyLib;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Vintagestory.GameContent;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
-using Vintagestory.API.Config;
+using SaplingTreeParams2.Config;
+using Vintagestory.GameContent;
 
-namespace SaplingTreeParams2
+namespace SaplingTreeParams2.Systems
 {
     [HarmonyPatch(typeof(BlockEntitySapling), "CheckGrow")]
     public class Sapling
@@ -20,11 +15,13 @@ namespace SaplingTreeParams2
 
         private static NormalRandom normalRandom;
 
-        static void Prefix(float dt, ref BlockEntitySapling __instance)
+        [HarmonyPrefix]
+
+        private static void CheckGrowPatch(ref BlockEntitySapling __instance, float dt)
         {
-            String instTreeType = __instance.Block.Variant["wood"];
+            string instTreeType = __instance.Block.Variant["wood"];
             float temperature = __instance.Api.World.BlockAccessor.GetClimateAt(__instance.Pos, EnumGetClimateMode.NowValues).Temperature;
-            
+
             if (__instance.Api is ICoreServerAPI && normalRandom == null)
             {
                 normalRandom = new NormalRandom(__instance.Api.World.Seed);
@@ -35,10 +32,10 @@ namespace SaplingTreeParams2
             {
                 return;
             }
-            
+
             ICoreServerAPI sapi = __instance.Api as ICoreServerAPI;
             SaplingParameters rcc = SaplingTreeParamConfig.Instance.saplingParameters.Find(saplingParameters => saplingParameters.treeType == instTreeType);
-            
+
             if (!rcc.ignoreColdTemp && temperature < 5f) return;
 
             // Access private fields not normally available through reflection
@@ -94,7 +91,7 @@ namespace SaplingTreeParams2
             __instance.Api.World.BlockAccessor.SetBlock(0, __instance.Pos);
             __instance.Api.World.BulkBlockAccessor.ReadFromStagedByDefault = true;
             //float size = 0.6f + (float)__instance.Api.World.Rand.Next(0, (int) rcc.size) * 0.5f;
-            
+
             float size = 0.6f + (float)__instance.Api.World.Rand.NextDouble() * rcc.size;
 
             TreeGenParams pa = new TreeGenParams()
